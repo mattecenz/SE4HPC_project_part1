@@ -13,7 +13,7 @@
 // We are not going to address test cases where these assumptions are broken
 
 
-TEST(MatrixMultiplication, TestMultiplyByZeros) {
+TEST(MatrixMultiplicationTest, TestMultiplyByZeros) {
 	const int rowsA = 10;
 	const int colsA = 3;
 	const int rowsB = colsA;
@@ -27,6 +27,20 @@ TEST(MatrixMultiplication, TestMultiplyByZeros) {
 
 	auto expected = build_empty_matrix(rowsA, colsB);
 	ASSERT_EQ(C, expected) << "Multiplication of zero matrices must be zero!";
+}
+
+
+TEST(MatrixMultiplicationTest, TestOddColumns) {
+	auto A = build_empty_matrix(1, 3);
+	auto B = build_empty_matrix(3, 1);
+	auto C = build_empty_matrix(1, 1);
+	auto expected = build_empty_matrix(1, 1);
+
+	multiplyMatrices(A, B, C, 1, 3, 1);
+	multiplyMatricesWithoutErrors(A, B, expected, 1, 3, 1);
+
+	ASSERT_EQ(C, expected) << "Multiplication should allow arbitrary sizes!";
+
 }
 
 
