@@ -1,3 +1,7 @@
+#include "matrix_utils.h"
+#include <random>
+
+
 std::vector<std::vector<int>>
 build_empty_matrix(const int rows, const int cols) {
 	std::vector<std::vector<int>> result(rows);
