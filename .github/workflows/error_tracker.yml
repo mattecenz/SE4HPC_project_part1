@@ -7,8 +7,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # TODO we need to clone the submodules
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Google test submodule checkout
+        uses: textbook/git-checkout-submodule-action@master
 
       - name: CMake setup
         uses: jwlawson/actions-setup-cmake@v1
