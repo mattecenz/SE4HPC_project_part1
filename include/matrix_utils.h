@@ -2,12 +2,15 @@
 #define MATRIX_UTILS_H
 
 
-#include <vector>
+#include "matrix_multiplication.h"
 
 
-std::vector<std::vector<int>> build_empty_matrix(const int rows, const int cols);
-std::vector<std::vector<int>> build_random_matrix(const int rows, const int cols, int seed = 0);
+Matrix build_empty_matrix (const int rows, const int cols);
+Matrix build_random_matrix(const int rows, const int cols, int seed = 0);
 
+
+// maybe useful
+// Matrix build_identity_matrix(const int rows, const int cols);
 
 
 #endif

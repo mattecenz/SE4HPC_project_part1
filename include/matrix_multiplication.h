@@ -1,10 +1,13 @@
 #ifndef MATRIX_MULTIPLICATION_H
 #define MATRIX_MULTIPLICATION_H
 
-#include <vector>
 
-void multiplyMatrices(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, std::vector<std::vector<int>>& C, int rowsA, int colsA, int colsB);
-void multiplyMatricesWithoutErrors(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, std::vector<std::vector<int>>& C, int rowsA, int colsA, int colsB);
+#include <vector>
+using Matrix = std::vector<std::vector<int>>;
+
+
+void multiplyMatrices             (const Matrix& A, const Matrix& B, Matrix& C, int rowsA, int colsA, int colsB);
+void multiplyMatricesWithoutErrors(const Matrix& A, const Matrix& B, Matrix& C, int rowsA, int colsA, int colsB);
 
 
 #endif // MATRIX_MULTIPLICATION_H

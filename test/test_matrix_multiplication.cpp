@@ -4,6 +4,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 
+
 // ######################### Source code of multiplyMatrices in src/matrix_mult
 // The call to multiplyMatrices(A, B, C, rowsA, colsA, colsB) assumes that:
 //   * A has rowsA rows, each has colsA elements
@@ -44,10 +45,6 @@ TEST(MatrixMultiplicationTest, TestOddColumns) {
 
 // We can work on a generic test to find maybe some interesting information
 TEST(MatrixMultiplicationTest, GenericTest){
-	
-	//Alias because writing vector of vectors is too long every time (and more clear)
-	using Matrix=std::vector<std::vector<int>>;
-
 	// We can start with the most simple test possible, a product [1]x[1]=[1]
 	Matrix A = {
 		{1}
@@ -166,7 +163,7 @@ TEST(MatrixMultiplicationTest, GenericTest){
 		{6,7,8,9}
 	};
 	// Define result as a 3x4 matrix of zeroes
-	Matrix H(3,std::vector<int>(4,0));
+	Matrix H = build_empty_matrix(3, 4);
 	// This is the true result of FxG
 	Matrix I = {
 		{14,17,20,23},
@@ -219,7 +216,7 @@ TEST(MatrixMultiplicationTest, GenericTest){
 		{7,7,8,9}
 	};
 	// Define result as a 3x4 matrix of zeroes
-	Matrix L(3,std::vector<int>(4,0));
+	Matrix L = build_empty_matrix(3, 4);
 	// This is the true result of FxG
 	Matrix M = {
 		{36,48,48,56},
@@ -256,20 +253,22 @@ TEST(MatrixMultiplicationTest, GenericTest){
 }
 
 TEST(MatrixMultiplicationTest, TestMultiplyMatrices) {
-	std::vector<std::vector<int>> A = {
+	Matrix A = {
 		{1, 2, 3},
 		{4, 5, 6}
 	};
-	std::vector<std::vector<int>> B = {
+
+	Matrix B = {
 		{7, 8},
 		{9, 10},
 		{11, 12}
 	};
-	std::vector<std::vector<int>> C(2, std::vector<int>(2, 0));
+
+	Matrix C = build_empty_matrix(2, 2);
 
 	multiplyMatrices(A, B, C, 2, 3, 2);
 
-	std::vector<std::vector<int>> expected = {
+	Matrix expected = {
 		{58, 64},
 		{139, 154}
 	};
