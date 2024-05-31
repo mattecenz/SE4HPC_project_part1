@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <gtest/gtest.h>
+#include <cmath>
 
 // ######################### Source code of multiplyMatrices in src/matrix_mult
 // The call to multiplyMatrices(A, B, C, rowsA, colsA, colsB) assumes that:
@@ -45,8 +46,14 @@ TEST(MatrixMultiplicationTest, TestOddColumns) {
 // We can work on a generic test to find maybe some interesting information
 TEST(MatrixMultiplicationTest, GenericTest){
 	
-	//Alias because writing vector of vectors is too long every time (and more clear)
+	// Alias because writing vector of vectors is too long every time (and more clear)
 	using Matrix=std::vector<std::vector<int>>;
+
+	// Apply a forced seed
+	// srand(0);
+
+	// Print to cerr what rand() I get
+	// std::cerr<<"\n\n"<<rand()<<"\n\n";
 
 	// We can start with the most simple test possible, a product [1]x[1]=[1]
 	Matrix A = {
@@ -137,13 +144,58 @@ TEST(MatrixMultiplicationTest, GenericTest){
 	// Results: 2069 2031 2009 1999 2028 2061 1988 2017 2024 2079 
 
 	// So this is not of course just luck (well if it is then we should participate to the SuperEnalotto immediately)
-	// Which means that our formula may be adjusted as C[0][0] = const(around 1900) + rand_variance + A[0][0]*B[0][0] (not sure about this part but maybe its testable)
+	// Which means that our formula may be adjusted as C[0][0] = const + rand_variance + A[0][0]*B[0][0] (not sure about this part but maybe its testable)
+
+	// It is interesting to see now what happens when forcing a seed using srand().
+	// For the moment I will use srand(0), should be the default
+
+	// The results are different, and I will focus on the first two matrices 
+
+	// C
+    // Which is: { { 2078 } }
+	// C
+    // Which is: { { 2034 } }
+
+	// And before they were
+
+	// C
+    // Which is: { { 2065 } }
+	// C
+    // Which is: { { 2055 } }
+
+	// Ok now let's see if i print to std::cerr the first random number I get using rand(); <- do it before the first matrix multiplication
+	// We get this number: 1804289383
+	// Which may not seem to tell us anything but in reality it does: it tells us that the number has been truncated
+	// So now the formula becomes C[0][0] = const + rand_variance%something + A[0][0]*B[0][0]
+
+	// Then let's sample the function 10000 times and calculate mean and standard deviation to see if something interesting arises
+	
+	// std::vector<int> res;
+	// size_t n=10000;
+
+	// for(size_t i=0;i<n;++i){
+	// 	multiplyMatrices(A,B,C,1,1,1);
+	// 	res.emplace_back(C[0][0]);
+	// }
+
+	// double mean=0.;
+	// double stdev=0.;
+
+	// for(auto el:res) mean+=(double)el;
+	// mean/=n;
+	// for(auto el:res) stdev+=(mean-(double)el)*(mean-(double)el);
+	// stdev=sqrt(stdev/(n-1));
+
+	// std::cerr<<n<<" samples:\nMean:\t"<<mean<<"\nStdev:\t"<<stdev<<std::endl;
+
+	// 	Mean:	2034.81
+	// Stdev:	28.7712
+
+	// Ok interesting now we can see some results
 
 	// |-----------------------------------------------------------------------------------------------|
 	// |***********************************************************************************************|
 	// |-----------------------------------------------------------------------------------------------|
-
-	// The testing above now requires some fine tuning (finding the constant and the variance) but its complicated
 
 	// So let's focus on the errors above:
 
@@ -220,7 +272,7 @@ TEST(MatrixMultiplicationTest, GenericTest){
 	};
 	// Define result as a 3x4 matrix of zeroes
 	Matrix L(3,std::vector<int>(4,0));
-	// This is the true result of FxG
+	// This is the true result
 	Matrix M = {
 		{36,48,48,56},
 		{60,66,72,82},
@@ -238,7 +290,7 @@ TEST(MatrixMultiplicationTest, GenericTest){
 
 	// 	Error 1: Element-wise multiplication of ones detected!
 	//  Error 4: Matrix B contains the number 3!
-	//  Error 7: Result matrix contains a number between 11 and 20! (NB: we could check the bounds if are included or not, but honestly who cares)
+	//  Error 7: Result matrix contains a number between 11 and 20!
 	// Error 12: The number of rows in A is equal to the number of columns in B!
 	// Error 13: The first element of matrix A is equal to the first element of matrix B!
 	// Error 16: Matrix B contains the number 6!
@@ -252,6 +304,367 @@ TEST(MatrixMultiplicationTest, GenericTest){
 	// |***********************************************************************************************|
 	// |-----------------------------------------------------------------------------------------------|
 
+	// It's time to discover some more errors. 
+	// So two ideas come to my mind: the first is using negative numbers in multiplication
+	// and the other is using the multiplication with the identity matrix (why ? idk it seems cool)
+
+	// Let's start with a matrix with negative numbers (I will try to use some different numbers too)
+	// But I will still try to avoid most of the errors
+
+	Matrix N = {
+		{7,-3},
+		{8,9},
+		{10,11}
+	};
+	Matrix O = {
+		{5,5,4,-1},
+		{-5,9,8,9}
+	};
+	// Define result as a 3x4 matrix of zeroes
+	Matrix P(3,std::vector<int>(4,0));
+	// This is the true result (it contains also some bigger numbers too)
+	Matrix Q = {
+		{50,8,4,-34},
+		{-5,121,104,73},
+		{-5,149,128,89}
+	};
+
+	// Call the function and jesus take the wheel !
+	multiplyMatrices(N,O,P,3,2,4);	
+
+	EXPECT_EQ(P,Q);
+
+	// Hey ! I get some interesting results :
+	
+	// Error 2: Matrix A contains the number 7!
+	// Error 3: Matrix A contains a negative number!
+	// Error 5: Matrix B contains a negative number!
+	// Error 6: Result matrix contains a number bigger than 100!
+	// Error 7: Result matrix contains a number between 11 and 20!
+
+	// I made a ladder ! Do I win something like in poker ? But jokes aside, the new error list becomes:
+
+	// 	Error 1: Element-wise multiplication of ones detected!
+	//  Error 2: Matrix A contains the number 7!
+	//  Error 3: Matrix A contains a negative number!
+	//  Error 4: Matrix B contains the number 3!
+	//  Error 5: Matrix B contains a negative number!
+	//  Error 6: Result matrix contains a number bigger than 100!
+	//  Error 7: Result matrix contains a number between 11 and 20!
+	// Error 12: The number of rows in A is equal to the number of columns in B!
+	// Error 13: The first element of matrix A is equal to the first element of matrix B!
+	// Error 16: Matrix B contains the number 6!
+	// Error 18: Matrix A is a square matrix!
+	// Error 20: Number of columns in matrix A is odd!
+
+	// Ok trying to fix these errors will result in using non negative small numbers, so it is not very interesting
+
+	// I want to try just out of curiosity what happens with a simple multiplication by the identity now:
+
+	// Use simple matrices (will give errors on columns but who cares honestly)
+	Matrix R = {
+		{2,0},
+		{0,2},
+	};
+	Matrix S = {
+		{1,0},
+		{0,1}
+	};
+	// Define result
+	Matrix T(2,std::vector<int>(2,0));
+	// The true result now is just R
+
+	// Call the function and jesus take the wheel !
+	multiplyMatrices(R,S,T,2,2,2);	
+
+	EXPECT_EQ(R,T);
+
+	// Good ! We get more errors !
+
+	// 	Error 8: Result matrix contains zero!
+	// Error 11: Every row in matrix B contains at least one '0'!
+	// Error 14: The result matrix C has an even number of rows!
+
+	// Actually fun fact: even if we have the error 8 we get the result:
+	// T
+	// Which is: { { 2039, 9 }, { 9, 2 } }
+	// Which does not contain zero...
+
+	// 	Error 1: Element-wise multiplication of ones detected!
+	//  Error 2: Matrix A contains the number 7!
+	//  Error 3: Matrix A contains a negative number!
+	//  Error 4: Matrix B contains the number 3!
+	//  Error 5: Matrix B contains a negative number!
+	//  Error 6: Result matrix contains a number bigger than 100!
+	//  Error 7: Result matrix contains a number between 11 and 20!
+	// 	Error 8: Result matrix contains zero!
+	// Error 11: Every row in matrix B contains at least one '0'!
+	// Error 12: The number of rows in A is equal to the number of columns in B!
+	// Error 13: The first element of matrix A is equal to the first element of matrix B!
+	// Error 14: The result matrix C has an even number of rows!
+	// Error 16: Matrix B contains the number 6!
+	// Error 18: Matrix A is a square matrix!
+	// Error 20: Number of columns in matrix A is odd!
+
+	// |-----------------------------------------------------------------------------------------------|
+	// |***********************************************************************************************|
+	// |-----------------------------------------------------------------------------------------------|
+
+	// Now that I found some errors (15/20) I will try to brute force them a bit
+	// What do I mean ? I want to perform the same test as above (multiplication with the identity)
+	// but with each diagonal matrix from 0 to 100 (seems reasonable) and manually check if I find new errors
+
+	// Why ? Because I am starting to forget that some numbers behave funny
+
+	// Matrix U = {
+	// 	{0,0},
+	// 	{0,0},
+	// };
+	// Matrix V = {
+	// 	{1,0},
+	// 	{0,1}
+	// };
+	// Matrix W(2,std::vector<int>(2,0));
+
+	// std::cerr<<"Starting the batch test...\n";
+	// for(size_t i=0;i<101;++i){
+	// 	W[0][0]=0;
+	// 	W[0][1]=0;
+	// 	W[1][0]=0;
+	// 	W[1][1]=0;
+
+	// 	U[0][0]=i;
+	// 	U[1][1]=i;
+	// 	std::cerr<<"Testing "<<i<<std::endl;
+
+	// 	multiplyMatrices(U,V,W,2,2,2);	
+	// 	EXPECT_EQ(U,W);
+	// }
+	// std::cerr<<"Finishing the batch test...";
+
+	// Leave it commented, it takes a lot and the test cases can now be isolated
+
+	// Here I will leave the possible new errors I will get (it will take a bit but it may be worth it)
+
+	// Testing 8:
+	// Error 19: Every row in matrix A contains the number 8!
+	// Testing 99:
+	// Error 9: Result matrix contains the number 99!
+
+	// Well that was mostly for nothing... or was it ? (VSauce music intensifies)
+
+	// I noticed something... when showing the error 7 the real output number gets modified.
+	// And it is modified by some random pattern, then we are not exactly testing each possible output 
+	// in the range (11,20) since we cannot really control it.
+	// Sooooooo.... can we actually force it ?
+	// Good question actually, let's try to isolate the test now... but maybe in another function
+
+	// 	Error 1: Element-wise multiplication of ones detected!
+	//  Error 2: Matrix A contains the number 7!
+	//  Error 3: Matrix A contains a negative number!
+	//  Error 4: Matrix B contains the number 3!
+	//  Error 5: Matrix B contains a negative number!
+	//  Error 6: Result matrix contains a number bigger than 100!
+	//  Error 7: Result matrix contains a number between 11 and 20!
+	// 	Error 8: Result matrix contains zero!
+	//  Error 9: Result matrix contains the number 99!
+	// Error 11: Every row in matrix B contains at least one '0'!
+	// Error 12: The number of rows in A is equal to the number of columns in B!
+	// Error 13: The first element of matrix A is equal to the first element of matrix B!
+	// Error 14: The result matrix C has an even number of rows!
+	// Error 16: Matrix B contains the number 6!
+	// Error 18: Matrix A is a square matrix!
+	// Error 19: Every row in matrix A contains the number 8!
+	// Error 20: Number of columns in matrix A is odd!
+
+}
+
+TEST(MatrixMultiplicationTest, AnotherGenericTest){
+
+	using Matrix=std::vector<std::vector<int>>;
+
+	// We can start by the test which before did work and try to isolate the error 7
+	Matrix A = {
+		{4,4},
+		{2,8},
+		{5,6}
+	};
+	Matrix B = {
+		{2,5,4,5},
+		{7,7,8,9}
+	};
+	// Define result as a 3x4 matrix of zeroes
+	Matrix C(3,std::vector<int>(4,0));
+	// This is the true result
+	Matrix D = {
+		{36,48,48,56},
+		{60,66,72,82},
+		{52,67,68,79}
+	};
+
+	multiplyMatrices(A,B,C,3,2,4);	
+
+	// Run it again because why not
+	EXPECT_EQ(C,D);
+
+	// Re-read error 7;
+	//  Error 7: Result matrix contains a number between 11 and 20!
+
+	// Then it should be pretty easy to do, just some number changes should be fine
+
+	// Reset it, cleaner to visualize
+	A = {
+		{4,1}, // <- Here is the only thing really changed
+		{2,8},
+		{5,6}
+	};
+	B = {
+		{2,5,4,5},
+		{7,7,8,9}
+	};
+	//Set to zero
+	for(auto row:C) for(auto el:row) el=0;
+	D = {
+		{15,27,24,29}, // <- And here the result of course
+		{60,66,72,82},
+		{52,67,68,79}
+	};
+
+	multiplyMatrices(A,B,C,3,2,4);	
+
+	EXPECT_EQ(C,D);
+
+	// Good, now I have isolated the error, and these are the matrices
+	// 	  C
+	//     Which is: { { 25, 27, 24, 29 }, { 60, 66, 72, 82 }, { 52, 67, 68, 79 } }
+	//   D
+	//     Which is: { { 15, 27, 24, 29 }, { 60, 66, 72, 82 }, { 52, 67, 68, 79 } }
+
+	// The funny thing is that the number is modified, so let's try to see the randomness here
+
+	for(size_t i=0;i<20;++i){
+		multiplyMatrices(A,B,C,3,2,4);
+		EXPECT_EQ(C,D);
+	}
+
+	// Well well what did i get... in technical language we say that I found something sus :)
+
+	// 	Error 17: Result matrix C contains the number 17!
+	//   C
+	//     Which is: { { 2082, 27, 24, 29 }, { 60, 66, 72, 82 }, { 52, 67, 68, 79 } }
+	//   D
+	//     Which is: { { 15, 27, 24, 29 }, { 60, 66, 72, 82 }, { 52, 67, 68, 79 } }
+
+	//Hihi now I discovered another error... I am only missing 2 now:
+	
+	// 	Error 1: Element-wise multiplication of ones detected!
+	//  Error 2: Matrix A contains the number 7!
+	//  Error 3: Matrix A contains a negative number!
+	//  Error 4: Matrix B contains the number 3!
+	//  Error 5: Matrix B contains a negative number!
+	//  Error 6: Result matrix contains a number bigger than 100!
+	//  Error 7: Result matrix contains a number between 11 and 20!
+	// 	Error 8: Result matrix contains zero!
+	//  Error 9: Result matrix contains the number 99!
+	// Error 11: Every row in matrix B contains at least one '0'!
+	// Error 12: The number of rows in A is equal to the number of columns in B!
+	// Error 13: The first element of matrix A is equal to the first element of matrix B!
+	// Error 14: The result matrix C has an even number of rows!
+	// Error 16: Matrix B contains the number 6!
+	// Error 17: Result matrix C contains the number 17!
+	// Error 18: Matrix A is a square matrix!
+	// Error 19: Every row in matrix A contains the number 8!
+	// Error 20: Number of columns in matrix A is odd!
+
+	// Hmmmm so its 15 and 10... I will read through them to see if I can see something to test
+
+	// Idk to me it looks like something that has to do with matrix B (a mirror of errror 19)
+	// So I will do a mirror of the batch test I did above
+
+	// Matrix U = {
+	// 	{1,0},
+	// 	{0,1},
+	// };
+	// Matrix V = {
+	// 	{0,0},
+	// 	{0,0}
+	// };
+	// Matrix W(2,std::vector<int>(2,0));
+
+	// std::cerr<<"Starting the batch test...\n";
+	// for(size_t i=0;i<101;++i){
+	// 	W[0][0]=0;
+	// 	W[0][1]=0;
+	// 	W[1][0]=0;
+	// 	W[1][1]=0;
+
+	// 	V[0][0]=i;
+	// 	V[1][1]=i;
+	// 	std::cerr<<"Testing "<<i<<std::endl;
+
+	// 	multiplyMatrices(U,V,W,2,2,2);	
+	// 	// This will not hold true in general so comment it
+	// 	//EXPECT_EQ(U,W);
+	// }
+	// std::cerr<<"Finishing the batch test...";
+
+	// Now let's be armed with patience and look for 10 and 15
+	// Sucks to suck but nope I was wrong...
+
+	// Ok then maybe let's try with full matrices and not diagonal matrices now
+
+	// Matrix U = {
+	// 	{0,0},
+	// 	{0,0},
+	// };
+	// Matrix V = {
+	// 	{1,0},
+	// 	{0,1}
+	// };
+	// Matrix W(2,std::vector<int>(2,0));
+
+	// std::cerr<<"Starting the batch test...\n";
+	// for(size_t i=0;i<101;++i){
+	// 	W[0][0]=0;
+	// 	W[0][1]=0;
+	// 	W[1][0]=0;
+	// 	W[1][1]=0;
+
+	// 	U[0][0]=i;
+	// 	U[0][1]=i;
+	// 	U[1][0]=i;
+	// 	U[1][1]=i;
+	// 	std::cerr<<"Testing "<<i<<std::endl;
+
+	// 	multiplyMatrices(U,V,W,2,2,2);	
+	// 	//EXPECT_EQ(U,W);
+	// }
+	// std::cerr<<"Finishing the batch test...";
+
+	// I GOT THEM ! NICE
+	// Error 10: A row in matrix A contains more than one '1'!
+	// Error 15: A row in matrix A is filled entirely with 5s!
+
+	// 	Error 1: Element-wise multiplication of ones detected!
+	//  Error 2: Matrix A contains the number 7!
+	//  Error 3: Matrix A contains a negative number!
+	//  Error 4: Matrix B contains the number 3!
+	//  Error 5: Matrix B contains a negative number!
+	//  Error 6: Result matrix contains a number bigger than 100!
+	//  Error 7: Result matrix contains a number between 11 and 20!
+	// 	Error 8: Result matrix contains zero!
+	//  Error 9: Result matrix contains the number 99!
+	// Error 10: A row in matrix A contains more than one '1'!
+	// Error 11: Every row in matrix B contains at least one '0'!
+	// Error 12: The number of rows in A is equal to the number of columns in B!
+	// Error 13: The first element of matrix A is equal to the first element of matrix B!
+	// Error 14: The result matrix C has an even number of rows!
+	// Error 15: A row in matrix A is filled entirely with 5s!
+	// Error 16: Matrix B contains the number 6!
+	// Error 17: Result matrix C contains the number 17!
+	// Error 18: Matrix A is a square matrix!
+	// Error 19: Every row in matrix A contains the number 8!
+	// Error 20: Number of columns in matrix A is odd!
 
 }
 
