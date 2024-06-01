@@ -1,0 +1,30 @@
+name: Error Tracker
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Google test submodule checkout
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
+
+      - name: CMake setup
+        uses: jwlawson/actions-setup-cmake@v1
+
+      - name: Configure build
+        run: cmake -S . -B build
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: error_tracker.sh
