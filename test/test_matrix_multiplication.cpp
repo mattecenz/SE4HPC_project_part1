@@ -46,14 +46,14 @@ TEST(MatrixMultiplicationTest, TestOddColumns) {
 
 */
 
-	/*
-	
-	We will try to test each error individually, so that no test will produce the 
+/*
 
-	Since the testing will produce the fictional errors, we will employ the ASSERT_NE in order to
-	show that the result is not what we expected
+We will try to test each error individually, so that no test will produce the 
 
-	*/
+Since the testing will produce the fictional errors, we will employ the ASSERT_NE in order to
+show that the result is not what we expected
+
+*/
 
 using Matrix = std::vector<std::vector<int>>;
 
