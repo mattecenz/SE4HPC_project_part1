@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
@@ -27,4 +27,13 @@ jobs:
         run: cmake --build build
 
       - name: Run tests
-        run: ./error_tracker.sh
+        run: ./error_tracker.sh > errors.txt
+
+      - name: Commit the found errors in the repository
+        run: |
+          git config --global user.name 'FattiMei'
+          git config --global user.email 'FattiMei@users.noreply.github.com'
+          git add errors.txt
+          git commit -m "Automated error filtering"
+          git push
+
