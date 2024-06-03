@@ -26,6 +26,17 @@ Use the template available [here](https://github.com/SimoneReale/SE4HPC_project_
 
 Your task is extending the file `test_matrix_multiplication.cpp` with your test cases. Please insert proper comments in the code to explain why you have selected that specific test case and the behaviour you expect from it. Push the result of your work in your repo. If your local environment does not allow you to create a correct build, consider using the GitHub actions and their runners. This will be useful also for your next task.
 
+## Testing
+
+The testing can be subdivided in two parts.
+
+`test_matrix_multiplication_incorrect.cpp` is directed to discover all the 20 errors proposed in the buggy implementation.
+
+*NB:* the file `pre_test.cpp` contains an in-depth analysis of the problem and how all the 20 errors were discovered.
+
+`test_matrix_multiplication_correct.cpp` contains some tests that can be run in a standard matrix-matrix multiplication (it contains also the domain assumptions).
+
+When building the folder one can find both the executables `test_multiplication_correct` and `test_multiplication_incorrect`, and decide which file he/she prefers to run.
 
 ## Github action for scanning runtime errors
 Since the proposed tests expose the errors of the implementation, they fail. To have a passing action and prevent spam emails from github, we have wrapped the execution of tests in a script that always returns zero.
