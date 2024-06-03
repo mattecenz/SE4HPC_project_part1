@@ -30,7 +30,7 @@ jobs:
         run: ./build/test_multiplication_correct
 
       - name: Run tests
-        run: ./error_tracker.sh > errors.txt
+        run: ./error_tracker.sh ./build/test_multiplication_incorrect > errors.txt
 
       - name: Commit the found errors in the repository
         run: |
